@@ -33,10 +33,10 @@
       (cond
         (and (= uri "/api/evaluate") (= method :post))
         (handle-evaluate-portfolio request evaluation-service logging-service)
-        
+
         (and (= uri "/health") (= method :get))
         (handle-health-check request)
-        
+
         :else
         {:status 404
          :body {:error "Not found"}}))))
@@ -46,7 +46,7 @@
     (let [start (System/currentTimeMillis)
           response (handler request)
           duration (- (System/currentTimeMillis) start)]
-      (logging-port/log-info logging-service 
+      (logging-port/log-info logging-service
                              (str "Request completed in " duration " ms with status " (:status response)))
       response)))
 

@@ -37,7 +37,7 @@
       (Integer/parseInt port-str)
       (catch NumberFormatException _
         (let [logging-service (logging-port/->LoggingService)]
-          (logging-port/log-warn logging-service 
+          (logging-port/log-warn logging-service
                                  (str "Invalid PORT environment variable value: " port-str " - using default 8080")))
         8080))))
 

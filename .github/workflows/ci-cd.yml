@@ -9,56 +9,56 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Setup Java
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: '17'
-    
+
     - name: Install Leiningen
       uses: DeLaGuardo/setup-clojure@12.1
       with:
         lein: 2.10.0
-    
+
     - name: Install dependencies
       run: lein deps
-    
+
     - name: Run tests
       run: lein test
-      
+
     - name: Run architectural fitness checks
       run: ./bin/check-architecture.sh
-    
+
     - name: Build uberjar
       run: lein uberjar
-      
+
     - name: Upload uberjar artifact
       uses: actions/upload-artifact@v4
       with:
         name: walue-uberjar
         path: target/uberjar/walue-*-standalone.jar
-  
+
   docker-build:
     needs: build-and-test
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
-      
+
     - name: Login to DockerHub
       uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-        
+
     - name: Build and push
       uses: docker/build-push-action@v5
       with:

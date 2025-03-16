@@ -27,7 +27,7 @@
   value-fn)
 
 (defn get-all-metrics []
-  (reduce-kv 
+  (reduce-kv
     (fn [acc k v]
       (let [value (cond
                     (= (:type v) :counter) (get-counter-value (:value v))

@@ -9,7 +9,7 @@
 
 (defrecord LoggingService []
   LoggingPort
-  (log-info [_ message] 
+  (log-info [_ message]
     (println (str "{\"level\":\"info\",\"message\":\"" message "\"}")))
   (log-warn [_ message]
     (println (str "{\"level\":\"warn\",\"message\":\"" message "\"}")))

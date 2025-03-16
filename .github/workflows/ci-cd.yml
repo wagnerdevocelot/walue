@@ -51,5 +51,5 @@ jobs:
         context: .
         push: true
         tags: |
-          yourusername/walue:latest
-          yourusername/walue:${{ github.sha }}
+          wagner1337/walue:latest
+          wagner1337/walue:${{ github.sha }}

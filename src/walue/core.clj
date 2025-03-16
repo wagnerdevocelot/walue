@@ -1,7 +1,8 @@
 (ns walue.core
   (:require [ring.adapter.jetty :as jetty]
             [walue.adapter.http-adapter :as http]
-            [walue.port.evaluation-port :as port]
+            [walue.port.evaluation-port :as evaluation-port]
+            [walue.port.logging-port :as logging-port]
             [walue.infra.logging :as logging]
             [walue.infra.metrics :as metrics])
   (:gen-class))
@@ -9,19 +10,21 @@
 (def server-atom (atom nil))
 
 (defn start-server [port]
-  (let [evaluation-service (port/->EvaluationService)
-        app (http/create-app evaluation-service)
+  (let [evaluation-service (evaluation-port/->EvaluationService)
+        logging-service (logging-port/->LoggingService)
+        app (http/create-app evaluation-service logging-service)
         metrics (metrics/init-metrics)
         server (jetty/run-jetty app {:port port :join? false})]
     (reset! server-atom server)
-    (logging/info "Server started on port" port)
+    (logging-port/log-info logging-service (str "Server started on port " port))
     server))
 
 (defn stop-server []
   (when-let [server @server-atom]
     (.stop server)
     (reset! server-atom nil)
-    (logging/info "Server stopped")))
+    (let [logging-service (logging-port/->LoggingService)]
+      (logging-port/log-info logging-service "Server stopped"))))
 
 (defn- get-env-var [name default]
   (if-let [value (System/getenv name)]
@@ -33,7 +36,9 @@
     (try
       (Integer/parseInt port-str)
       (catch NumberFormatException _
-        (logging/warn "Invalid PORT environment variable value:" port-str "- using default 8080")
+        (let [logging-service (logging-port/->LoggingService)]
+          (logging-port/log-warn logging-service 
+                                 (str "Invalid PORT environment variable value: " port-str " - using default 8080")))
         8080))))
 
 (defn- get-log-level []
@@ -51,9 +56,10 @@
                  (catch NumberFormatException _
                    (get-port)))
                (get-port))
-        log-level (get-log-level)]
+        log-level (get-log-level)
+        logging-service (logging-port/->LoggingService)]
     (logging/set-log-level! log-level)
-    (logging/info "Starting server with log level:" log-level)
+    (logging-port/log-info logging-service (str "Starting server with log level: " log-level))
     (start-server port)
     (.addShutdownHook (Runtime/getRuntime)
                       (Thread. ^Runnable stop-server))))

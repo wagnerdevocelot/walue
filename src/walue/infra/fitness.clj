@@ -50,7 +50,7 @@
         files (get-clj-files src-dir)
         ns-deps (keep extract-namespace-and-deps files)
         violations (atom [])]
-    
+
     (doseq [[ns-name deps] ns-deps]
       (let [src-layer (ns-to-layer ns-name)]
         (when src-layer
@@ -59,12 +59,12 @@
               (when (and dep-layer
                          (not (contains? (get allowed-deps src-layer) dep-layer))
                          (not= src-layer dep-layer))
-                (swap! violations conj 
+                (swap! violations conj
                        {:source ns-name
                         :source-layer src-layer
                         :dependency dep
                         :dependency-layer dep-layer})))))))
-    
+
     {:valid? (empty? @violations)
      :violations @violations}))
 
@@ -75,16 +75,16 @@
         files (get-clj-files src-dir)
         ns-deps (keep extract-namespace-and-deps files)
         violations (atom [])]
-    
+
     (doseq [[ns-name deps] ns-deps]
       (doseq [dep deps]
         (let [dep-str (str dep)]
           (when-not (or (str/starts-with? dep-str "clojure.")
                         (str/starts-with? dep-str "walue.domain"))
-            (swap! violations conj 
+            (swap! violations conj
                    {:namespace ns-name
                     :external-dependency dep})))))
-    
+
     {:valid? (empty? @violations)
      :violations @violations}))
 
@@ -97,12 +97,12 @@
         visited (atom #{})
         path (atom [])
         cycles (atom [])]
-    
+
     (letfn [(dfs [ns]
               (when-not (contains? @visited ns)
                 (swap! visited conj ns)
                 (swap! path conj ns)
-                
+
                 (doseq [dep (get ns-deps ns)]
                   (if (some #{dep} @path)
                     ;; Encontrou um ciclo
@@ -111,13 +111,13 @@
                       (swap! cycles conj cycle))
                     ;; Continue DFS
                     (dfs dep)))
-                
+
                 (swap! path pop)))]
-      
+
       (doseq [ns (keys ns-deps)]
         (reset! path [])
         (dfs ns)))
-    
+
     {:valid? (empty? @cycles)
      :cycles @cycles}))
 
@@ -127,15 +127,15 @@
   (let [src-dir "src/walue/port"
         files (get-clj-files src-dir)
         violations (atom [])]
-    
+
     (doseq [file files]
       (let [content (slurp file)
             file-name (.getName file)]
         (when-not (re-find #"defprotocol" content)
-          (swap! violations conj 
+          (swap! violations conj
                  {:file file-name
                   :reason "Port file should define at least one protocol"}))))
-    
+
     {:valid? (empty? @violations)
      :violations @violations}))
 
@@ -145,18 +145,18 @@
   (let [src-dir "src/walue/adapter"
         files (get-clj-files src-dir)
         violations (atom [])]
-    
+
     (doseq [file files]
       (let [content (slurp file)
             file-name (.getName file)
-            has-port-dependency (or 
+            has-port-dependency (or
                                  (re-find #"require.*\[walue\.port" content)
                                  (re-find #"walue\.port\.[a-z-]+\s+:as" content))]
         (when-not has-port-dependency
-          (swap! violations conj 
+          (swap! violations conj
                  {:file file-name
                   :reason "Adapter should depend on at least one port"}))))
-    
+
     {:valid? (empty? @violations)
      :violations @violations}))
 
@@ -173,7 +173,7 @@
                         (:valid? circular-deps-result)
                         (:valid? interface-result)
                         (:valid? adapter-result))]
-    
+
     {:all-valid? all-valid?
      :layer-dependencies layer-deps-result
      :domain-purity domain-purity-result
@@ -186,9 +186,9 @@
   [& args]
   (let [results (run-fitness-checks)
         all-valid? (:all-valid? results)]
-    
+
     (println "\n=== Architectural Fitness Check Results ===\n")
-    
+
     ;; Verifica dependências entre camadas
     (let [{:keys [valid? violations]} (:layer-dependencies results)]
       (println "Layer Dependencies Check:" (if valid? "PASSED ✓" "FAILED ✗"))
@@ -197,7 +197,7 @@
         (doseq [v violations]
           (println (str "  - " (:source v) " (" (name (:source-layer v)) ") depends on "
                        (:dependency v) " (" (name (:dependency-layer v)) ")")))))
-    
+
     ;; Verifica pureza do domínio
     (let [{:keys [valid? violations]} (:domain-purity results)]
       (println "\nDomain Purity Check:" (if valid? "PASSED ✓" "FAILED ✗"))
@@ -205,7 +205,7 @@
         (println "  Violations:")
         (doseq [v violations]
           (println (str "  - " (:namespace v) " depends on external " (:external-dependency v))))))
-    
+
     ;; Verifica dependências circulares
     (let [{:keys [valid? cycles]} (:circular-dependencies results)]
       (println "\nCircular Dependencies Check:" (if valid? "PASSED ✓" "FAILED ✗"))
@@ -213,7 +213,7 @@
         (println "  Cycles detected:")
         (doseq [cycle cycles]
           (println (str "  - " (str/join " -> " cycle))))))
-    
+
     ;; Verifica isolamento de interfaces
     (let [{:keys [valid? violations]} (:interface-isolation results)]
       (println "\nInterface Isolation Check:" (if valid? "PASSED ✓" "FAILED ✗"))
@@ -221,7 +221,7 @@
         (println "  Violations:")
         (doseq [v violations]
           (println (str "  - " (:file v) ": " (:reason v))))))
-    
+
     ;; Verifica implementação de adaptadores
     (let [{:keys [valid? violations]} (:adapter-implementation results)]
       (println "\nAdapter Implementation Check:" (if valid? "PASSED ✓" "FAILED ✗"))
@@ -229,7 +229,7 @@
         (println "  Violations:")
         (doseq [v violations]
           (println (str "  - " (:file v) ": " (:reason v))))))
-    
+
     (println "\nOverall Result:" (if all-valid? "PASSED ✓" "FAILED ✗"))
-    
+
     (System/exit (if all-valid? 0 1))))

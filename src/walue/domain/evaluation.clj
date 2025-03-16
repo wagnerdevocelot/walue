@@ -47,7 +47,7 @@
 (defn calculate-asset-score
   "Calculate score for a single asset based on all criteria"
   [asset criteria]
-  (reduce 
+  (reduce
     (fn [score criterion]
       (if (evaluate-criterion asset criterion)
         (+ score (or (:peso criterion) (get criterion "peso")))
@@ -58,7 +58,7 @@
 (defn evaluate-portfolio
   "Main domain function that evaluates a portfolio based on criteria"
   [portfolio criteria]
-  (let [evaluated-assets (map 
+  (let [evaluated-assets (map
                            (fn [asset]
                              {:ticker (or (:ticker asset) (get asset "ticker"))
                               :score (calculate-asset-score asset criteria)})

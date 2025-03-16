@@ -1,7 +1,7 @@
 # Walue - Portfolio Evaluation Service
 
-[![CI/CD Pipeline](https://github.com/yourusername/walue/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/yourusername/walue/actions/workflows/ci-cd.yml)
-[![Architectural Fitness](https://img.shields.io/badge/Architectural%20Fitness-Checked-brightgreen.svg)](https://github.com/yourusername/walue/blob/main/src/walue/infra/fitness.clj)
+[![CI/CD Pipeline](https://github.com/wagnerdevocelot/walue/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/wagnerdevocelot/walue/actions/workflows/ci-cd.yml)
+[![Architectural Fitness](https://img.shields.io/badge/Architectural%20Fitness-Checked-brightgreen.svg)](https://github.com/wagnerdevocelot/walue/blob/main/src/walue/infra/fitness.clj)
 
 A Clojure web service that implements a portfolio evaluation system using Domain-Driven Design (DDD) and Hexagonal Architecture.
 

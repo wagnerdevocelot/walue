@@ -44,7 +44,7 @@
                       (mock/json-body request-body))
           response (app request)
           body (parse-json-body response)]
-      
+
       (is (= 200 (:status response)))
       (is (vector? (:resultado body)))
       (is (= 2 (count (:resultado body))))
@@ -60,7 +60,7 @@
             request (mock/request :get "/health")
             response (app request)
             body (parse-json-body response)]
-        
+
         (is (= 200 (:status response)))
         (is (= "UP" (:status body)))))
 
@@ -72,6 +72,6 @@
                         (mock/json-body {:invalid "request"}))
             response (app request)
             body (parse-json-body response)]
-        
+
         (is (= 400 (:status response)))
         (is (contains? body :error))))))

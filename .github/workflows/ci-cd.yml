@@ -29,6 +29,9 @@ jobs:
     
     - name: Run tests
       run: lein test
+      
+    - name: Run architectural fitness checks
+      run: ./bin/check-architecture.sh
     
     - name: Build uberjar
       run: lein uberjar

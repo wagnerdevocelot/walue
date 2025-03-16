@@ -1,5 +1,8 @@
 # Walue - Portfolio Evaluation Service
 
+[![CI/CD Pipeline](https://github.com/yourusername/walue/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/yourusername/walue/actions/workflows/ci-cd.yml)
+[![Architectural Fitness](https://img.shields.io/badge/Architectural%20Fitness-Checked-brightgreen.svg)](https://github.com/yourusername/walue/blob/main/src/walue/infra/fitness.clj)
+
 A Clojure web service that implements a portfolio evaluation system using Domain-Driven Design (DDD) and Hexagonal Architecture.
 
 ## Overview
@@ -41,6 +44,33 @@ The project follows Hexagonal Architecture (also known as Ports and Adapters) an
 - **Ports**: Define interfaces that the domain uses to interact with the outside world.
 - **Adapters**: Implement the interfaces defined by the ports, connecting the domain to external systems (HTTP, databases, etc.).
 - **Infrastructure**: Provides technical capabilities like logging and metrics.
+
+### Architectural Fitness Functions
+
+This project includes automated architectural fitness functions that enforce the following rules:
+
+1. **Layer Dependency Rules**:
+   - Domain can only depend on Clojure stdlib
+   - Port can only depend on Domain
+   - Adapter can depend on Domain and Port
+   - Infrastructure should be self-contained
+   - Core can depend on all layers
+
+2. **Domain Purity**: Ensures domain code has no external dependencies beyond Clojure stdlib
+
+3. **Circular Dependency Prevention**: Detects and prevents circular dependencies between components
+
+4. **Interface Isolation**: Ensures all ports define protocols (interfaces)
+
+5. **Adapter Implementation**: Verifies that adapters implement at least one port
+
+These checks run automatically in the CI/CD pipeline and locally via:
+
+```bash
+./bin/check-architecture.sh
+```
+
+The fitness functions prevent architectural degradation over time as new changes are introduced.
 
 ## API
 

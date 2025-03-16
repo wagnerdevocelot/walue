@@ -3,15 +3,17 @@
             [ring.mock.request :as mock]
             [clojure.data.json :as json]
             [walue.adapter.http-adapter :as http]
-            [walue.port.evaluation-port :as port]))
+            [walue.port.evaluation-port :as evaluation-port]
+            [walue.port.logging-port :as logging-port]))
 
 (defn- parse-json-body [response]
   (json/read-str (:body response) :key-fn keyword))
 
 (deftest http-adapter-integration-test
   (testing "Portfolio evaluation endpoint"
-    (let [evaluation-service (port/->EvaluationService)
-          app (http/create-app evaluation-service)
+    (let [evaluation-service (evaluation-port/->EvaluationService)
+          logging-service (logging-port/->LoggingService)
+          app (http/create-app evaluation-service logging-service)
           request-body {:portfolio [{:ticker "PETR4"
                                      :pl 8.5
                                      :tag_along 80
@@ -52,8 +54,9 @@
       (is (= 4.5 (:score (second (:resultado body))))))
 
     (testing "Health check endpoint"
-      (let [evaluation-service (port/->EvaluationService)
-            app (http/create-app evaluation-service)
+      (let [evaluation-service (evaluation-port/->EvaluationService)
+            logging-service (logging-port/->LoggingService)
+            app (http/create-app evaluation-service logging-service)
             request (mock/request :get "/health")
             response (app request)
             body (parse-json-body response)]
@@ -62,8 +65,9 @@
         (is (= "UP" (:status body)))))
 
     (testing "Invalid request handling"
-      (let [evaluation-service (port/->EvaluationService)
-            app (http/create-app evaluation-service)
+      (let [evaluation-service (evaluation-port/->EvaluationService)
+            logging-service (logging-port/->LoggingService)
+            app (http/create-app evaluation-service logging-service)
             request (-> (mock/request :post "/api/evaluate")
                         (mock/json-body {:invalid "request"}))
             response (app request)
